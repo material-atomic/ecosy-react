@@ -16,8 +16,8 @@ yarn add @ecosy/react react
 ## Quick start
 
 ```ts
-import { createSlice, type PayloadAction } from "@ecosy/store";
-import { combineSlices, connectStore } from "@ecosy/react";
+import { createSlice, combineSlices, type PayloadAction } from "@ecosy/store";
+import { connectStore } from "@ecosy/react";
 
 // 1. Create slices
 const counterSlice = createSlice({
@@ -43,26 +43,11 @@ const { useSelector, useDispatch, getState, dispatch } = connectStore({ slices }
 
 ## API
 
-### `combineSlices(slices)`
-
-Combines multiple slices into a single initial state, root reducer, and event map.
-
-```ts
-import { combineSlices } from "@ecosy/react";
-
-const slices = combineSlices({
-  counter: counterSlice,
-  todos: todosSlice,
-});
-
-slices.initialState; // { counter: { count: 0 }, todos: { items: [] } }
-slices.reducer;      // combined root reducer
-slices.events;       // merged event channels
-```
-
 ### `connectStore(options)`
 
-Connects combined slices to a store and returns React hooks and utilities.
+Connects combined slices to a store and returns React hooks and utilities. Internally delegates to `configureStore` from `@ecosy/store` and layers React hooks on top.
+
+> **Note:** `combineSlices` now lives in [`@ecosy/store`](https://github.com/material-atomic/ecosy-store). Import it from there.
 
 ```ts
 const {

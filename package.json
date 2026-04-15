@@ -1,6 +1,6 @@
 {
   "name": "@ecosy/react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "React bindings for @ecosy/store — hooks, selectors, and store connection",
   "license": "MIT",
   "publishConfig": {
@@ -43,8 +43,8 @@
   ],
   "author": "material-atomic",
   "dependencies": {
-    "@ecosy/core": "^0.1.0",
-    "@ecosy/store": "^0.1.0"
+    "@ecosy/core": "*",
+    "@ecosy/store": "*"
   },
   "peerDependencies": {
     "react": "^16.8 || ^17 || ^18 || ^19"
