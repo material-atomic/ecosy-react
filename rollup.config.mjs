@@ -45,6 +45,7 @@ const cjsConfig = {
     preserveModules: true,
     preserveModulesRoot: "src",
     interop: "auto",
+    sourcemap: true,
   },
   plugins: [
     typescript({
@@ -72,11 +73,13 @@ const esmConfig = {
     generatedCode: {
       symbols: true,
     },
+    sourcemap: true,
   },
   plugins: [
     typescript({
       tsconfig: "./tsconfig.json",
       declaration: false,
+      declarationMap: false,
       declarationDir: undefined,
       rootDir: "src",
     }),

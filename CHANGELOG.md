@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 (2026-04-19)
+
+### Features
+
+- **Store Order Factory**: Extracted tracking and selector logic into a standalone `createStoreOrder(store)` factory. This enables you to bind an optimized `useStoreOrder` hook directly to any generic `@ecosy/core` Subscriber store without going through `connectStore`.
+- **Path Exports**: Exposed a new sub-export `"@ecosy/react/order"` in `package.json` to allow targeted module resolution and better tree-shaking.
+
+### Improvements
+
+- Refactored `connectStore` internals to delegate `useSelector` logic natively through `createStoreOrder`.
+- Updated underlying dependencies `@ecosy/core` to `^0.3.4` and `@ecosy/store` to `^0.2.0`.
+
+### Fixes
+
+- **Build**: Fixed TypeScript `TS5069` compiler warnings by safely turning off `declarationMap` within the Rollup ESM override block. Enforced structured `sourcemap: true` Rollup emission bindings.
+
+---
 ## 0.2.0 (2026-04-15)
 
 ### Improvements

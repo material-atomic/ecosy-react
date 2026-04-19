@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from "react";
-
 import { isEqual } from "@ecosy/core/utilities";
 import { configureStore } from "@ecosy/store";
+import { createStoreOrder } from "./order";
 import type {
   SliceMap,
   CombinedState,
@@ -71,27 +70,28 @@ export function connectStore<Slices extends SliceMap<any>, Signals extends strin
   type State = CombinedState<Slices>;
 
   // 2. useSelector — subscribe to store, re-render on change
-  function useSelector<Selected>(selector: (state: State) => Selected): Selected {
-    const selectorRef = useRef(selector);
+  const useSelector = createStoreOrder(store);
+  // function useSelector<Selected>(selector: (state: State) => Selected): Selected {
+  //   const selectorRef = useRef(selector);
 
-    useEffect(() => {
-      selectorRef.current = selector;
-    });
+  //   useEffect(() => {
+  //     selectorRef.current = selector;
+  //   });
 
-    const [selected, setSelected] = useState(() => selector(getState()));
+  //   const [selected, setSelected] = useState(() => selector(getState()));
 
-    useEffect(() => {
-      function handleChange() {
-        const next = selectorRef.current(getState());
-        setSelected((prev) => (isEqual(prev, next) ? prev : next));
-      }
+  //   useEffect(() => {
+  //     function handleChange() {
+  //       const next = selectorRef.current(getState());
+  //       setSelected((prev) => (isEqual(prev, next) ? prev : next));
+  //     }
 
-      handleChange();
-      return store.onStateChange(handleChange);
-    }, []);
+  //     handleChange();
+  //     return store.onStateChange(handleChange);
+  //   }, []);
 
-    return selected;
-  }
+  //   return selected;
+  // }
 
   // 3. useDispatch
   function useDispatch() {
