@@ -7,6 +7,7 @@ import type {
   CombinedState,
   CombinedActions,
   ConfigureStoreOptions,
+  WiredStore,
 } from "@ecosy/store";
 
 // --- connectStore ---
@@ -18,7 +19,7 @@ export interface ConnectStoreOptions<Slices extends SliceMap<any>, Signals exten
 
 /** Result of {@link connectStore}, providing React bindings for a combined store. */
 export interface ConnectStoreResult<Slices extends SliceMap<any>> {
-  store: ReturnType<typeof configureStore>["store"];
+  store: WiredStore<Slices>;
   dispatch: (action: CombinedActions<Slices>) => void;
   getState: () => CombinedState<Slices>;
   hydrate: (state: Partial<CombinedState<Slices>>) => void;
@@ -64,7 +65,7 @@ export interface ConnectStoreResult<Slices extends SliceMap<any>> {
 export function connectStore<Slices extends SliceMap<any>, Signals extends string[] = []>(
   options: ConnectStoreOptions<Slices, Signals>,
 ): ConnectStoreResult<Slices> {
-  // 1. Delegate toàn bộ pure logic cho configureStore
+  // 1. Delegate all pure store logic to configureStore
   const { store, dispatch, getState, hydrate } = configureStore(options);
 
   type State = CombinedState<Slices>;

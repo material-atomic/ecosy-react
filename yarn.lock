@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ecosy/core/-/core-0.3.4.tgz#0dc2a174dec3ba5e10ed302730c58cdc373336d9"
   integrity sha512-P2ThnWwsWaFWnBKqnHwLQqubQNVPIjodMx9KkrF6fo+VYf5hHIq01t5kK/VNhAlrJBo9cEx4Ca76te2v4brWvg==
 
-"@ecosy/store@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@ecosy/store/-/store-0.2.0.tgz#8235637b6c9c277b105a6fde9e8f4b7d38c9e8d4"
-  integrity sha512-UvFnW4gRgtsAr4A4PvfGV4nmaISK/R4FJLYfbOKLdqzD4kdowoZA91FEdEM30DtHuB8hkVbMluzs3tdvuwjYUw==
+"@ecosy/store@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@ecosy/store/-/store-0.2.1.tgz#523a58f29d5760e2fb489ffd03aa04abf6b18e4e"
+  integrity sha512-h57Ha98xQ3p4/7lTbw22AohBHTN0AWGUeZd0gaV+aXrYh3E0BuVvVWRCXjjBmtRj8XTOjGxPgg7JU/PBq8Rxfg==
   dependencies:
     "@ecosy/core" "*"
 

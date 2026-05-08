@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.1 (2026-05-08)
+
+### Bug Fixes
+
+- **connectStore**: `ConnectStoreResult.store` no longer drops the `Slices` generic. It previously typed as `ReturnType<typeof configureStore>["store"]`, which fell back to default generics and erased the wired per-slice event handles — `store.<slice>.<event>` and `store.<slice>.on<Event>` were unreachable from TypeScript even though they existed at runtime.
+
+### Types
+
+- **`store` is now `WiredStore<Slices>`** (re-exported from `@ecosy/store@^0.2.1`). React consumers get full inference for slice event handles directly off the store returned by `connectStore`, with no manual cast needed.
+
+### Compatibility
+
+- Bumps the required `@ecosy/store` dep to `^0.2.1` so `WiredStore<Slices>` and the corrected `CombinedEvents<Slices>` are available. Without that upgrade the new `store` field still resolves but inherits the upstream double-nesting bug.
+- No runtime behaviour change. Pure type-level fix; consumers may delete local re-cast workarounds (`connected.store as unknown as WiredStore<...>`) once they upgrade to this version.
+
+---
+
 ## 0.3.0 (2026-04-19)
 
 ### Features
