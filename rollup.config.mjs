@@ -20,6 +20,11 @@ const input = inputFiles.reduce((acc, file) => {
 const external = [
   /^@ecosy\//,
   /^react/,
+  /* tslib must stay external. Bundled with preserveModules, rollup emits its
+     path relative to the output root — "./node_modules/tslib/tslib.es6.mjs" —
+     which is a path on the machine that built the package and does not exist
+     on anyone else's. */
+  "tslib",
 ];
 
 // Minification configuration
