@@ -1,7 +1,7 @@
 {
   "name": "@ecosy/react",
-  "version": "0.3.1",
-  "description": "React bindings for @ecosy/store — hooks, selectors, and store connection",
+  "version": "0.4.0",
+  "description": "Provider-less React hooks and selectors for @ecosy/store, plus list rendering and SVG icon helpers",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -31,6 +31,18 @@
       "types": "./dist/order.d.ts",
       "import": "./dist/order.mjs",
       "require": "./dist/order.js"
+    },
+    "./listing": {
+      "source": "./src/listing.ts",
+      "types": "./dist/listing.d.ts",
+      "import": "./dist/listing.mjs",
+      "require": "./dist/listing.js"
+    },
+    "./svg-icon": {
+      "source": "./src/svg-icon.ts",
+      "types": "./dist/svg-icon.d.ts",
+      "import": "./dist/svg-icon.mjs",
+      "require": "./dist/svg-icon.js"
     }
   },
   "scripts": {
@@ -50,9 +62,12 @@
   "keywords": [
     "ecosy",
     "react",
-    "state-management",
     "hooks",
-    "useSelector"
+    "state-management",
+    "useSelector",
+    "listing",
+    "svg-icon",
+    "typescript"
   ],
   "author": "material-atomic",
   "dependencies": {
