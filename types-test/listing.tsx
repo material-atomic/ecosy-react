@@ -45,3 +45,36 @@ export const primitivesByFn = <Listing items={names} Item={NameRow} keyExtractor
 
 // @ts-expect-error a list of primitives has no property to key on
 export const primitivesByProperty = <Listing items={names} Item={NameRow} itemKey="length" />;
+
+/* ---- what the index signature used to let through ---- */
+
+// @ts-expect-error "Itme" is a typo; it used to type-check and render nothing
+export const typo = <Listing items={users} Itme={UserRow} />;
+
+// @ts-expect-error dense is a boolean on UserRow
+export const wrongType = <Listing items={users} Item={UserRow} dense="yes" />;
+
+// @ts-expect-error UserRow takes no "sparse"
+export const unknownProp = <Listing items={users} Item={UserRow} sparse />;
+
+// @ts-expect-error Listing supplies item per row
+export const suppliedItem = <Listing items={users} Item={UserRow} item={users[0]} />;
+
+// @ts-expect-error Listing supplies index per row
+export const suppliedIndex = <Listing items={users} Item={UserRow} index={0} />;
+
+/* ---- a required prop on Item ---- */
+
+/* A required prop on the item component. */
+function LabelledRow({ item, label }: { item: User; index: number; label: string }) {
+  return <li>{label}: {item.name}</li>;
+}
+
+/* Forwarding is optional — `Listing` passes on what it is given, and does not
+   undertake to satisfy `Item`'s contract. */
+export const missingRequired = <Listing items={users} Item={LabelledRow} />;
+
+// @ts-expect-error but a prop that is passed must be the right type
+export const wrongRequired = <Listing items={users} Item={LabelledRow} label={1} />;
+
+export const withRequired = <Listing items={users} Item={LabelledRow} label="x" />;

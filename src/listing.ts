@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createElement, Fragment, type ComponentType, type Key, type PropsWithChildren, type ReactNode } from "react";
 
-/** Props for {@link Listing}. Any property beyond these is forwarded to every `Item`. */
-export interface ListingProps<Data, ItemProps> {
+/** What `Listing` itself consumes. Everything else belongs to `Item`. */
+export interface ListingOwnProps<Data, ItemProps> {
   /** The data to render. Empty, `null` and `undefined` all render `empty`. */
   items: Data[];
   /** Rendered once per entry, receiving `{ ...rest, key, item, index }`. */
@@ -26,8 +26,31 @@ export interface ListingProps<Data, ItemProps> {
    * {@link Listing}.
    */
   keyExtractor?: (item: Data, index: number) => Key;
-  [x: string]: any;
 }
+
+/**
+ * Props for {@link Listing}: its own, plus whatever `Item` takes.
+ *
+ * The forwarded half is `ItemProps` minus what `Listing` supplies per row.
+ * `item` and `index` come from the data — one value each, per row — so a
+ * caller cannot meaningfully pass them and anything it did pass would be
+ * overwritten. Leaving them in would make an editor offer `item` as a prop of
+ * `<Listing>`, which is a suggestion to write something that cannot work.
+ *
+ * `Partial`, because forwarding is optional: `Listing` passes on what it is
+ * given and does not undertake to satisfy `Item`'s own contract. Requiring
+ * every prop `Item` requires would turn a list renderer into a wrapper that
+ * has to know what each row needs.
+ *
+ * The types are not partial. A prop that *is* passed has to be one `Item`
+ * takes, with the type it declares.
+ *
+ * It used to be `[x: string]: any`, which accepted anything at all: a
+ * misspelled `Itme={Row}`, a `dense="yes"` where a boolean was wanted, a prop
+ * the item does not take. All of those type-checked.
+ */
+export type ListingProps<Data, ItemProps> = ListingOwnProps<Data, ItemProps> &
+  Partial<Omit<ItemProps, "item" | "index">>;
 
 /**
  * Renders a list without the `items.map(...)` boilerplate, and without every
