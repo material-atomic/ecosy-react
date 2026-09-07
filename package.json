@@ -1,6 +1,6 @@
 {
   "name": "@ecosy/react",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Provider-less React hooks and selectors for @ecosy/store, plus list rendering and SVG icon helpers",
   "license": "MIT",
   "publishConfig": {
