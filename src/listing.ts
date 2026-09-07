@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createElement, Fragment, type ComponentType, type Key, type PropsWithChildren, type ReactNode } from "react";
 
 /** What `Listing` itself consumes. Everything else belongs to `Item`. */
