@@ -1,6 +1,6 @@
 {
   "name": "@ecosy/react",
-  "version": "0.5.0",
+  "version": "0.4.2",
   "description": "Provider-less React hooks and selectors for @ecosy/store, plus list rendering and SVG icon helpers",
   "license": "MIT",
   "publishConfig": {
@@ -47,13 +47,14 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "eslint src/ && rollup -c",
+    "build": "eslint src/ && yarn types:test && rollup -c",
     "prepublishOnly": "yarn clean && yarn build",
     "dev": "rollup -c --watch",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
-    "format:check": "prettier --check src/"
+    "format:check": "prettier --check src/",
+    "types:test": "tsc -p tsconfig.types-test.json"
   },
   "repository": {
     "type": "git",
