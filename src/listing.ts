@@ -2,7 +2,14 @@ import { createElement, Fragment, type ComponentType, type Key, type PropsWithCh
 
 /** What `Listing` itself consumes. Everything else belongs to `Item`. */
 export interface ListingOwnProps<Data, ItemProps, Carry = undefined> {
-  /** The data to render. Empty, `null` and `undefined` all render `empty`. */
+  /**
+   * The data. Empty, `null` and `undefined` all render `empty`.
+   *
+   * Under {@link ListingOwnProps.range} this stays the **whole** list, not the
+   * visible slice. Holding a reference to an array is not walking it: a row's
+   * neighbours are `items[i - 1]` and `items[i + 1]`, which cost the same
+   * whether the array holds twenty entries or fifty thousand.
+   */
   items: Data[];
   /**
    * Rendered once per entry, receiving
@@ -38,6 +45,26 @@ export interface ListingOwnProps<Data, ItemProps, Carry = undefined> {
    * {@link Listing}.
    */
   keyExtractor?: (item: Data, index: number) => Key;
+  /**
+   * Which slice of {@link ListingOwnProps.items} to render, `start` inclusive
+   * and `end` exclusive. What a virtualizer hands over.
+   *
+   * A range rather than a pre-cut slice, and the difference is the whole point:
+   * with a slice, `index` counts from the window instead of the list, and
+   * `previous` is `undefined` at the top of every scroll position — so a date
+   * separator redraws at the head of each window and a run of messages breaks
+   * every time the user scrolls. Neither of those reports an error. They are
+   * simply right on a short list and wrong once the list is long enough to
+   * virtualise, which is when nobody is scrolling by hand to notice.
+   *
+   * Given the array and a range, `index` is the real one and both neighbours
+   * are real entries. The cost stays proportional to the window: only the rows
+   * in range are built.
+   *
+   * Out-of-bounds ends are clamped rather than refused — a virtualizer
+   * overshoots at the edges by design, and that is not a mistake to report.
+   */
+  range?: { start: number; end: number };
   /**
    * Carries a value along the list, handing each row the total **as it stands
    * at that row** — a scan, not a reduce.
@@ -128,7 +155,7 @@ export function Listing<Data, ItemProps extends { item: Data }, Carry = undefine
 ): ReactNode {
   const {
     items, Item, Container = Fragment, empty = null,
-    itemKey, keyExtractor, accumulate, seed,
+    itemKey, keyExtractor, accumulate, seed, range,
     ...rest
   } = props;
 
@@ -172,12 +199,36 @@ export function Listing<Data, ItemProps extends { item: Data }, Carry = undefine
     return index;
   };
 
+  /* Refused rather than quietly wrong. A fold over a window starts from `seed`
+     at the window's first row, so every total would be computed as though the
+     rows above did not exist — and it would look correct at the top of the list
+     and drift the further anyone scrolls.
+     
+     A virtualised list wants its running totals computed once, incrementally,
+     outside, and passed in as one stable map. That is what the virtualizer
+     already does for heights. */
+  if (accumulate && range) {
+    throw new Error(
+      "[Listing] `accumulate` cannot be used with `range`: a fold restarted at the " +
+        "window's first row gives every row a total that ignores the rows above it. " +
+        "Compute the running values once outside and pass them in — a Map keyed by " +
+        "id is one stable prop for every row.",
+    );
+  }
+
+  const start = range ? Math.max(0, Math.min(range.start, items.length)) : 0;
+  const end = range ? Math.max(start, Math.min(range.end, items.length)) : items.length;
+
+  const window: number[] = [];
+  for (let i = start; i < end; i++) window.push(i);
+
   /* A local, folded as the map walks. See `accumulate` for why this is neither
      a ref nor memoised. */
   let carry = seed as Carry;
 
   return createElement(Container, {
-    children: items.map((item, index) => {
+    children: window.map((index) => {
+      const item = items[index] as Data;
       /* Before the row is built, so the row receives the total INCLUDING
          itself — the scan the option describes, not a lagging one. */
       if (accumulate) carry = accumulate(carry, item, index);
@@ -187,6 +238,8 @@ export function Listing<Data, ItemProps extends { item: Data }, Carry = undefine
         key: keyOf(item, index),
         item,
         index,
+        /* From `items`, not from the window: at a window edge the real
+           neighbour exists and is what a separator or a grouping rule needs. */
         previous: index > 0 ? items[index - 1] : undefined,
         next: index + 1 < items.length ? items[index + 1] : undefined,
         carry,
