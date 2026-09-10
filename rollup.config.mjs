@@ -20,12 +20,21 @@ const input = inputFiles.reduce((acc, file) => {
 const external = [
   /^@ecosy\//,
   /^react/,
-  /* tslib must stay external. Bundled with preserveModules, rollup emits its
-     path relative to the output root — "./node_modules/tslib/tslib.es6.mjs" —
-     which is a path on the machine that built the package and does not exist
-     on anyone else's. */
-  "tslib",
 ];
+
+/* There is no tslib here, and that is the fix rather than an omission.
+ *
+ * At target ES2017 TypeScript downlevels object rest — `const { a, ...rest }`
+ * — into `__rest`, and with preserveModules rollup then emits tslib as a chunk
+ * at "./node_modules/tslib/tslib.es6.mjs": a path inside the published package
+ * that npm prune, pnpm's strict layout and bundler file-tracing all have leave
+ * to remove. Keeping tslib external avoided that, at the cost of a runtime
+ * dependency for one helper.
+ *
+ * ES2020 emits the rest spread natively, so the helper is never generated and
+ * there is nothing to resolve. It stops short of the ES2022 that @ecosy/orm
+ * uses on purpose: that one is server-only on Node >=18, while this ships to
+ * browsers, and ES2020 already covers every engine React 19 runs on. */
 
 // Minification configuration
 const minifyOptions = {

@@ -2,17 +2,13 @@
 # yarn lockfile v1
 
 
-"@ecosy/core@*", "@ecosy/core@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@ecosy/core/-/core-0.3.4.tgz#0dc2a174dec3ba5e10ed302730c58cdc373336d9"
-  integrity sha512-P2ThnWwsWaFWnBKqnHwLQqubQNVPIjodMx9KkrF6fo+VYf5hHIq01t5kK/VNhAlrJBo9cEx4Ca76te2v4brWvg==
+"@ecosy/core@link:../ecosy-core":
+  version "0.0.0"
+  uid ""
 
-"@ecosy/store@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@ecosy/store/-/store-0.2.1.tgz#523a58f29d5760e2fb489ffd03aa04abf6b18e4e"
-  integrity sha512-h57Ha98xQ3p4/7lTbw22AohBHTN0AWGUeZd0gaV+aXrYh3E0BuVvVWRCXjjBmtRj8XTOjGxPgg7JU/PBq8Rxfg==
-  dependencies:
-    "@ecosy/core" "*"
+"@ecosy/store@link:../ecosy-store":
+  version "0.0.0"
+  uid ""
 
 "@eslint-community/eslint-utils@^4.8.0", "@eslint-community/eslint-utils@^4.9.1":
   version "4.9.1"
