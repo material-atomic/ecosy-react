@@ -4,7 +4,24 @@ import { createElement, Fragment, type ComponentType, type Key, type PropsWithCh
 export interface ListingOwnProps<Data, ItemProps> {
   /** The data to render. Empty, `null` and `undefined` all render `empty`. */
   items: Data[];
-  /** Rendered once per entry, receiving `{ ...rest, key, item, index }`. */
+  /**
+   * Rendered once per entry, receiving
+   * `{ ...rest, key, item, index, previous, next, carry }`.
+   *
+   * `previous` and `next` are the neighbouring entries, or `undefined` at the
+   * ends. They cost nothing — references to entries already in the array — and
+   * they are what a date separator or a run of messages from one author
+   * actually needs. Computing that outside means a fresh object per row, which
+   * is exactly what stops `memo(Item)` bailing out.
+   *
+   * Order is the only thing a list has that a set does not, so a row's
+   * neighbours are part of rendering one. A fold is not: anything `previous`
+   * cannot answer — a number running within a group, a total so far — is
+   * computed once into a `Map` keyed by id and passed as one prop. That is a
+   * single stable reference for every row, so `memo(Item)` still bails out,
+   * and it keeps the fold's correctness at the call site that understands it
+   * rather than in a rule this component would have to ask callers to follow.
+   */
   Item: ComponentType<ItemProps>;
   /** Wraps the items and receives only `children`. Defaults to `Fragment`. */
   Container?: ComponentType<PropsWithChildren>;
@@ -49,7 +66,7 @@ export interface ListingOwnProps<Data, ItemProps> {
  * the item does not take. All of those type-checked.
  */
 export type ListingProps<Data, ItemProps> = ListingOwnProps<Data, ItemProps> &
-  Partial<Omit<ItemProps, "item" | "index">>;
+  Partial<Omit<ItemProps, "item" | "index" | "previous" | "next">>;
 
 /**
  * Renders a list without the `items.map(...)` boilerplate, and without every
@@ -86,7 +103,11 @@ export type ListingProps<Data, ItemProps> = ListingOwnProps<Data, ItemProps> &
 export function Listing<Data, ItemProps extends { item: Data }>(
   props: ListingProps<Data, ItemProps>,
 ): ReactNode {
-  const { items, Item, Container = Fragment, empty = null, itemKey, keyExtractor, ...rest } = props;
+  const {
+    items, Item, Container = Fragment, empty = null,
+    itemKey, keyExtractor,
+    ...rest
+  } = props;
 
   if (!items || items.length === 0) {
     return empty;
@@ -133,7 +154,9 @@ export function Listing<Data, ItemProps extends { item: Data }>(
       ...rest,
       key: keyOf(item, index),
       item,
-      index
+      index,
+      previous: index > 0 ? items[index - 1] : undefined,
+      next: index + 1 < items.length ? items[index + 1] : undefined,
     } as unknown as ItemProps))
   });
 }
