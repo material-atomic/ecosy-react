@@ -63,6 +63,65 @@ export interface ListingOwnProps<Data, ItemProps, Carry = undefined> {
    *
    * Out-of-bounds ends are clamped rather than refused — a virtualizer
    * overshoots at the edges by design, and that is not a mistake to report.
+   *
+   * @example With `@tanstack/react-virtual`:
+   * ```tsx
+   * const scroller = useRef<HTMLDivElement>(null);
+   * const virtualizer = useVirtualizer({
+   *   count: messages.length,
+   *   getScrollElement: () => scroller.current,
+   *   estimateSize: () => 72,
+   *   overscan: 8,
+   * });
+   *
+   * const rows = virtualizer.getVirtualItems();
+   *
+   * // One prop, one reference, every row: the same shape `accumulate` asks for
+   * // when a list is virtualised. Rebuilt per scroll, which is correct — the
+   * // rows it describes are the ones on screen.
+   * const placed = useMemo(() => new Map(rows.map((r) => [r.index, r])), [rows]);
+   *
+   * <div ref={scroller} style={{ height: 600, overflow: "auto" }}>
+   *   <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
+   *     <Listing
+   *       items={messages}
+   *       range={{ start: rows[0]?.index ?? 0, end: (rows.at(-1)?.index ?? -1) + 1 }}
+   *       Item={Message}
+   *       itemKey="id"
+   *       placed={placed}
+   *       measure={virtualizer.measureElement}
+   *     />
+   *   </div>
+   * </div>
+   * ```
+   *
+   * `placed` and `measure` are forwarded straight through — `Listing` neither
+   * reads nor understands them. The row does:
+   *
+   * ```tsx
+   * function Message({ item, index, previous, placed, measure }: MessageProps) {
+   *   const at = placed.get(index);
+   *
+   *   return (
+   *     <div
+   *       ref={measure}
+   *       data-index={index}
+   *       style={{ position: "absolute", top: 0, insetInline: 0,
+   *                transform: `translateY(${at?.start ?? 0}px)` }}
+   *     >
+   *       {previous?.day !== item.day && <DayDivider day={item.day} />}
+   *       <Bubble text={item.text} />
+   *     </div>
+   *   );
+   * }
+   * ```
+   *
+   * `previous` is the real entry above, not the first row of the window, so the
+   * divider appears once — at the day boundary — and not again at the top of
+   * every scroll position.
+   *
+   * `data-index` is what `measureElement` reads to know which row it just
+   * measured, and it is the true index because `range` kept it that way.
    */
   range?: { start: number; end: number };
   /**
