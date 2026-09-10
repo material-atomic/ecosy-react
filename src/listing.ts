@@ -1,7 +1,7 @@
 import { createElement, Fragment, type ComponentType, type Key, type PropsWithChildren, type ReactNode } from "react";
 
 /** What `Listing` itself consumes. Everything else belongs to `Item`. */
-export interface ListingOwnProps<Data, ItemProps> {
+export interface ListingOwnProps<Data, ItemProps, Carry = undefined> {
   /** The data to render. Empty, `null` and `undefined` all render `empty`. */
   items: Data[];
   /**
@@ -15,12 +15,8 @@ export interface ListingOwnProps<Data, ItemProps> {
    * is exactly what stops `memo(Item)` bailing out.
    *
    * Order is the only thing a list has that a set does not, so a row's
-   * neighbours are part of rendering one. A fold is not: anything `previous`
-   * cannot answer — a number running within a group, a total so far — is
-   * computed once into a `Map` keyed by id and passed as one prop. That is a
-   * single stable reference for every row, so `memo(Item)` still bails out,
-   * and it keeps the fold's correctness at the call site that understands it
-   * rather than in a rule this component would have to ask callers to follow.
+   * neighbours are part of rendering one. What they cannot answer is
+   * {@link ListingOwnProps.accumulate}.
    */
   Item: ComponentType<ItemProps>;
   /** Wraps the items and receives only `children`. Defaults to `Fragment`. */
@@ -42,6 +38,32 @@ export interface ListingOwnProps<Data, ItemProps> {
    * {@link Listing}.
    */
   keyExtractor?: (item: Data, index: number) => Key;
+  /**
+   * Carries a value along the list, handing each row the total **as it stands
+   * at that row** — a scan, not a reduce.
+   *
+   * `[1, 2, 3]` with `(carry, n) => carry + n` and `seed: 0` gives the first
+   * row `1`, the second `3`, the third `6`. The fold runs as the row is
+   * reached, so a row never sees a total that includes rows below it.
+   *
+   * For what {@link ListingOwnProps.Item}'s `previous` cannot answer: a number
+   * running within a group, a balance after each entry, a height offset.
+   *
+   * Runs during render, over `items`, every time — a local, no ref. A ref
+   * survives renders React discards, so a StrictMode double render or a
+   * concurrent attempt thrown away would count twice, and only in development
+   * or only under load. Within one render a plain variable is all a running
+   * total needs.
+   *
+   * When the carry is an **object**, return the one you were given if nothing
+   * in it changed. A fold that rebuilds it every row hands every row a new
+   * prop and `memo(Item)` stops bailing out. A carry that is a number is a new
+   * value each row by definition — that is the point of it — and no discipline
+   * applies.
+   */
+  accumulate?: (carry: Carry, item: Data, index: number) => Carry;
+  /** Where {@link ListingOwnProps.accumulate} starts. */
+  seed?: Carry;
 }
 
 /**
@@ -65,8 +87,9 @@ export interface ListingOwnProps<Data, ItemProps> {
  * misspelled `Itme={Row}`, a `dense="yes"` where a boolean was wanted, a prop
  * the item does not take. All of those type-checked.
  */
-export type ListingProps<Data, ItemProps> = ListingOwnProps<Data, ItemProps> &
-  Partial<Omit<ItemProps, "item" | "index" | "previous" | "next">>;
+export type ListingProps<Data, ItemProps, Carry = undefined> =
+  ListingOwnProps<Data, ItemProps, Carry> &
+  Partial<Omit<ItemProps, "item" | "index" | "previous" | "next" | "carry">>;
 
 /**
  * Renders a list without the `items.map(...)` boilerplate, and without every
@@ -100,12 +123,12 @@ export type ListingProps<Data, ItemProps> = ListingOwnProps<Data, ItemProps> &
  * @param props - The data, the item component, and anything to forward to it.
  * @returns The wrapped items, or `empty` when there is nothing to render.
  */
-export function Listing<Data, ItemProps extends { item: Data }>(
-  props: ListingProps<Data, ItemProps>,
+export function Listing<Data, ItemProps extends { item: Data }, Carry = undefined>(
+  props: ListingProps<Data, ItemProps, Carry>,
 ): ReactNode {
   const {
     items, Item, Container = Fragment, empty = null,
-    itemKey, keyExtractor,
+    itemKey, keyExtractor, accumulate, seed,
     ...rest
   } = props;
 
@@ -149,14 +172,25 @@ export function Listing<Data, ItemProps extends { item: Data }>(
     return index;
   };
 
+  /* A local, folded as the map walks. See `accumulate` for why this is neither
+     a ref nor memoised. */
+  let carry = seed as Carry;
+
   return createElement(Container, {
-    children: items.map((item, index) => createElement(Item, {
-      ...rest,
-      key: keyOf(item, index),
-      item,
-      index,
-      previous: index > 0 ? items[index - 1] : undefined,
-      next: index + 1 < items.length ? items[index + 1] : undefined,
-    } as unknown as ItemProps))
+    children: items.map((item, index) => {
+      /* Before the row is built, so the row receives the total INCLUDING
+         itself — the scan the option describes, not a lagging one. */
+      if (accumulate) carry = accumulate(carry, item, index);
+
+      return createElement(Item, {
+        ...rest,
+        key: keyOf(item, index),
+        item,
+        index,
+        previous: index > 0 ? items[index - 1] : undefined,
+        next: index + 1 < items.length ? items[index + 1] : undefined,
+        carry,
+      } as unknown as ItemProps);
+    })
   });
 }
