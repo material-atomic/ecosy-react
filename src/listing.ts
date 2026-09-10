@@ -72,14 +72,26 @@ export interface ListingOwnProps<Data, ItemProps, Carry = undefined> {
    *   getScrollElement: () => scroller.current,
    *   estimateSize: () => 72,
    *   overscan: 8,
+   *   // Keyed by id, not by position. The measured-height cache is keyed by
+   *   // whatever this returns, and it defaults to the index — so on a list that
+   *   // prepends, every backfill of older history shifts every index and hands
+   *   // each measured height to a different message. The list jumps right after
+   *   // loading history, and nothing reports it.
+   *   getItemKey: (index) => messages[index].id,
    * });
    *
    * const rows = virtualizer.getVirtualItems();
    *
-   * // One prop, one reference, every row: the same shape `accumulate` asks for
-   * // when a list is virtualised. Rebuilt per scroll, which is correct — the
-   * // rows it describes are the ones on screen.
-   * const placed = useMemo(() => new Map(rows.map((r) => [r.index, r])), [rows]);
+   * // Position data the virtualizer already computed, narrowed to a lookup.
+   * // Rebuilt every frame, and that is right: it describes the rows on screen,
+   * // and there is only ever a screen's worth.
+   * //
+   * // Not the same thing as the Map that stands in for `accumulate`. That one
+   * // carries running totals across the WHOLE list and has to be built once,
+   * // incrementally — rebuilding it per frame is the cost that ruled
+   * // `accumulate` out here in the first place. Same type, opposite lifetimes,
+   * // and the lifetime is the half that matters.
+   * const placed = new Map(rows.map((r) => [r.index, r]));
    *
    * <div ref={scroller} style={{ height: 600, overflow: "auto" }}>
    *   <div style={{ height: virtualizer.getTotalSize(), position: "relative" }}>
