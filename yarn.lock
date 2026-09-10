@@ -2,14 +2,6 @@
 # yarn lockfile v1
 
 
-"@ecosy/core@link:../ecosy-core":
-  version "0.0.0"
-  uid ""
-
-"@ecosy/store@link:../ecosy-store":
-  version "0.0.0"
-  uid ""
-
 "@eslint-community/eslint-utils@^4.8.0", "@eslint-community/eslint-utils@^4.9.1":
   version "4.9.1"
   resolved "https://registry.yarnpkg.com/@eslint-community/eslint-utils/-/eslint-utils-4.9.1.tgz#4e90af67bc51ddee6cdef5284edf572ec376b595"
