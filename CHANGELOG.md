@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.1 (2026-09-15)
+
+### Fixes
+
+- **Exports**: `@ecosy/react/package.json` resolves; `require("@ecosy/react/package.json")` threw `ERR_PACKAGE_PATH_NOT_EXPORTED` before.
+
+---
+
 ## 0.3.1 (2026-05-08)
 
 ### Bug Fixes

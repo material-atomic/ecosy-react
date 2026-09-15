@@ -1,6 +1,6 @@
 {
   "name": "@ecosy/react",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Provider-less React hooks and selectors for @ecosy/store, plus list rendering and SVG icon helpers",
   "license": "MIT",
   "publishConfig": {
@@ -19,6 +19,7 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
+    "./package.json": "./package.json",
     "./listing": {
       "source": "./src/listing.ts",
       "types": "./dist/listing.d.ts",
